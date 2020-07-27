@@ -72,12 +72,13 @@ func (c *Company) DropHand(pIdx int, hIdx int) {
 
 // return needDrop
 func (c *Company) GiveHand(pFrom, pTo, hIdx int) bool {
-	c.handCard[pFrom] = utils.RemoveIdx(c.handCard[pFrom], hIdx)
+	defer func() {
+		c.handCard[pFrom] = utils.RemoveIdx(c.handCard[pFrom], hIdx)
+	}()
 	if pTo != -1 {
 		c.handCard[pTo] = append(c.handCard[pTo], c.handCard[pFrom][hIdx])
 		return len(c.handCard[pTo]) > 4
 	}
-
 	return false
 }
 
