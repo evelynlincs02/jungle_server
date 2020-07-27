@@ -1,15 +1,15 @@
 package event
 
-type Messege interface{}
+type Message interface{}
 
-type EventEmitter map[string][]chan Messege
+type EventEmitter map[string][]chan Message
 
 const (
 	STOP = "STOP"
 )
 
-func (emitter EventEmitter) On(evt string, handler func(args Messege)) {
-	newC := make(chan Messege)
+func (emitter EventEmitter) On(evt string, handler func(args Message)) {
+	newC := make(chan Message)
 	emitter[evt] = append(emitter[evt], newC)
 	go func() {
 		for {
@@ -36,11 +36,11 @@ func (emitter EventEmitter) RemoveAllListener() {
 	}
 }
 
-func (emitter EventEmitter) Emit(evt string, msg Messege) {
+func (emitter EventEmitter) Emit(evt string, msg Message) {
 	if _, ok := emitter[evt]; ok {
 		for _, ch := range emitter[evt] {
 			// 若不開 goroutine，在On之前就先Emit了的話會deadlock
-			go func(channel chan Messege) {
+			go func(channel chan Message) {
 				channel <- msg
 				if msg == STOP {
 					return

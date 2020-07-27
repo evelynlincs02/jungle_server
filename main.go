@@ -80,7 +80,7 @@ func handleConnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.WithFields(log.Fields{"login": msg.Result.GiveName}).Infof("msg=%s", msg)
+	log.WithFields(log.Fields{"login": msg.Result.GiveName}).Infof("%s", msg.String())
 
 	if msg.Type == transfer.TYPE_LOGIN {
 		loginData := msg.Result
@@ -133,19 +133,19 @@ func startGame(cList []clientInfo) {
 
 	time.Sleep(time.Second)
 	jungleGame := game.NewGame(idList)
-	jungleGame.EventManager.On(transfer.DISPATCH_MAP_INFO, func(msg event.Messege) {
+	jungleGame.EventManager.On(transfer.DISPATCH_MAP_INFO, func(msg event.Message) {
 		sendGameData(cList, transfer.SEND_GAMESHARE, msg)
 	})
-	jungleGame.EventManager.On(transfer.DISPATCH_COMPANY_INFO, func(msg event.Messege) {
+	jungleGame.EventManager.On(transfer.DISPATCH_COMPANY_INFO, func(msg event.Message) {
 		sendGameData(cList, transfer.SEND_GAMECOMPANY, msg)
 	})
-	jungleGame.EventManager.On(transfer.DISPATCH_ADMIT_ACTION, func(msg event.Messege) {
+	jungleGame.EventManager.On(transfer.DISPATCH_ADMIT_ACTION, func(msg event.Message) {
 		sendGameData(cList, transfer.SEND_ADMITACTION, msg)
 	})
-	jungleGame.EventManager.On(transfer.DISPATCH_COUNTDOWN, func(msg event.Messege) {
+	jungleGame.EventManager.On(transfer.DISPATCH_COUNTDOWN, func(msg event.Message) {
 		sendGameData(cList, transfer.SEND_COUNTDOWN, msg)
 	})
-	jungleGame.EventManager.On(transfer.DISPATCH_END, func(msg event.Messege) {
+	jungleGame.EventManager.On(transfer.DISPATCH_END, func(msg event.Message) {
 		sendGameData(cList, transfer.SEND_GAMEEND, msg)
 		endSignal <- "END"
 	})
@@ -159,14 +159,13 @@ func startGame(cList []clientInfo) {
 					log.Warn("ReadMessage:", err)
 					return
 				}
-
-				log.WithFields(log.Fields{"RECEIVE": struct{}{}}).Infoln(string(message))
-
 				err = json.Unmarshal(message, &msg)
 				if err != nil {
 					log.Warn("Unmarshal:", err)
 					return
 				}
+
+				log.WithFields(log.Fields{"RECEIVE": string(message)}).Infoln(msg.String())
 
 				if msg.Type == transfer.TYPE_ACTION {
 					jungleGame.EventManager.Emit(transfer.RECEIVE_CLIENT_ACTION, msg)
@@ -177,7 +176,7 @@ func startGame(cList []clientInfo) {
 	}
 }
 
-func sendGameData(cList []clientInfo, dataType string, data event.Messege) {
+func sendGameData(cList []clientInfo, dataType string, data event.Message) {
 	transObj := transfer.TransferObj{
 		Type:   dataType,
 		Result: data,
@@ -194,21 +193,22 @@ func sendGameData(cList []clientInfo, dataType string, data event.Messege) {
 	case transfer.SEND_GAMESHARE:
 		d := data.(transfer.ShareInfo)
 		targets = d.Target
+		log.WithFields(log.Fields{dataType: "ShareInfo"}).Infoln(d.String())
 	case transfer.SEND_GAMECOMPANY:
 		d := data.(transfer.CompanyInfo)
 		targets = d.Target
+		log.WithFields(log.Fields{dataType: "CompanyInfo"}).Infoln(d.String())
 	case transfer.SEND_COUNTDOWN:
 		d := data.(transfer.CountDown)
 		targets = d.Target
 	case transfer.SEND_ADMITACTION:
 		d := data.(transfer.AdmitAction)
 		targets = d.Target
+		log.WithFields(log.Fields{dataType: "AdmitAction"}).Infoln(d.String())
 	case transfer.SEND_GAMEEND:
 		d := data.(transfer.EndScore)
 		targets = d.Target
-	}
-	if dataType != transfer.SEND_COUNTDOWN {
-		log.WithFields(log.Fields{dataType: struct{}{}}).Infoln(string(jsonByte))
+		log.WithFields(log.Fields{dataType: "EndScore"}).Infoln(d.String())
 	}
 
 	for i := range cList {

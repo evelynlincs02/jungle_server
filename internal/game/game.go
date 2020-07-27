@@ -87,7 +87,7 @@ func NewGame(p []string) *Game {
 	g.obstaclePool = cardpool.NewObstaclePool()
 
 	g.EventManager = make(event.EventEmitter, 0)
-	g.EventManager.On(transfer.RECEIVE_CLIENT_ACTION, func(msg event.Messege) {
+	g.EventManager.On(transfer.RECEIVE_CLIENT_ACTION, func(msg event.Message) {
 		action := msg.(transfer.ClientAction).Result
 		if action.ActionType == DROP {
 			g.parseDrop(action.From, *action.Data)

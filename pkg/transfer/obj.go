@@ -1,6 +1,9 @@
 package transfer
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // ----------------Transfer to client
 type TransferObj struct {
@@ -32,8 +35,9 @@ type DrawCard struct {
 	Card     []int  `json:"card"`
 }
 
-func (info *ShareInfo) Stringer() string {
-	return fmt.Sprintf("%+v", info)
+func (info *ShareInfo) String() string {
+	return fmt.Sprintf("Market=%v, Position=%v, BearOffice= %v, BearProgress=%v, DeerOffice=%v, DeerProgress=%v",
+		info.Market, info.PlayerPosition, info.BearOffice, info.BearProgress, info.DeerOffice, info.DeerProgress)
 }
 
 type CompanyInfo struct {
@@ -45,12 +49,27 @@ type CompanyInfo struct {
 	EndOfMonth  *int     `json:"end_of_month"`
 }
 
+func (info *CompanyInfo) String() string {
+	return fmt.Sprintf("Company=%v, ProductId=%v, HandCard= %v, CheckMarket= %v",
+		info.Company, info.ProductId, info.HandCard, info.CheckMarket)
+}
+
 type AdmitAction struct {
 	Target []string `json:"target"`
 	Action []string `json:"action"`
 
 	DropType   *string  `json:"drop_type,omitempty"`
 	DropMarket *[][]int `json:"drop_market,omitempty"`
+}
+
+func (info *AdmitAction) String() string {
+	ret := fmt.Sprintf("Target=%v, Action=%v",
+		info.Target, info.Action)
+	if info.DropType != nil {
+		ret += fmt.Sprintf(", DropType= %v, DropMarket= %v",
+			info.DropType, info.DropMarket)
+	}
+	return ret
 }
 
 type EndScore struct {
@@ -62,6 +81,22 @@ type ProductSum struct {
 	Name  string `json:"name"`
 	Value int    `json:"value"`
 	Num   int    `json:"num"`
+}
+
+func (info *ProductSum) String() string {
+	return fmt.Sprintf("%s:%d", info.Name+strconv.Itoa(info.Value), info.Num)
+}
+
+func (info *EndScore) String() string {
+	bs := ""
+	for _, s := range info.BearScore {
+		bs += fmt.Sprintf("{%s}", s.String())
+	}
+	ds := ""
+	for _, s := range info.DeerScore {
+		ds += fmt.Sprintf("{%s}", s.String())
+	}
+	return fmt.Sprintf("BearScore={%s}, DeerScore={%s}", bs, ds)
 }
 
 type CountDown struct {
@@ -83,6 +118,10 @@ type ClientAction struct {
 	}
 }
 
+func (info *ClientAction) String() string {
+	return fmt.Sprintf("From=%s, ActionType=%s, Data=%v", info.Result.From, info.Result.ActionType, info.Result.Data)
+}
+
 type Login struct {
 	Type   string `json:"type"`
 	Result struct {
@@ -91,8 +130,8 @@ type Login struct {
 	}
 }
 
-func (info *Login) Stringer() string {
-	return fmt.Sprintf("{Type: %s, GiveName: %s}", info.Type, info.Result.GiveName)
+func (info *Login) String() string {
+	return fmt.Sprintf("Type=%s, GiveName=%s", info.Type, info.Result.GiveName)
 }
 
 // ----------------
