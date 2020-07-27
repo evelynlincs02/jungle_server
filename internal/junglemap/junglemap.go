@@ -63,12 +63,12 @@ func (j *JungleMap) Init() {
 	copy(j.shareFront[4:12], m)
 }
 
-func (j *JungleMap) Change(detail map[string]int) bool {
+func (j *JungleMap) Change(detail map[string]int, cNow string) string {
 	if _, ok := detail["obstacle"]; ok {
-		return true
+		return cNow
 	}
 
-	var obstacle bool = false
+	var obstacle string = ""
 
 	// 市場變動
 	for k, v := range detail {
@@ -94,7 +94,7 @@ func (j *JungleMap) Change(detail map[string]int) bool {
 			if j.officeHappy[k][v] {
 				j.officeHappy[k][v] = false
 			} else { // 本來就不開心，抽阻礙
-				obstacle = true
+				obstacle = cNow
 			}
 		}
 	}

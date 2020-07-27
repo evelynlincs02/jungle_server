@@ -158,8 +158,8 @@ func (g *Game) removePlayer(p string) {
 
 func (g *Game) drawShare() {
 	obstacle := g.drawChange(false)
-	if obstacle {
-		over := g.drawObstacle()
+	if obstacle != "" {
+		over := g.drawObstacle(obstacle)
 		if over {
 			g.switchPlayer()
 		}
@@ -168,17 +168,20 @@ func (g *Game) drawShare() {
 	}
 }
 
-func (g *Game) drawChange(bFirst bool) bool {
+func (g *Game) drawChange(bFirst bool) string {
 	var cId []int
+	var cNow string
 	if bFirst { // 第一次市場變動時不要抽"抽阻礙"的卡
 		cId = g.changePool.Draw(1, 16)
+		cNow = ""
 	} else {
 		cId = g.changePool.Draw(1)
+		cNow = g.cNames[g.pNow%2]
 	}
 	detail := g.changePool.GetContent(cId[0])
 	g.changePool.DropById(cId[0])
 
-	obstacle := g.jungleMap.Change(detail)
+	obstacle := g.jungleMap.Change(detail, cNow)
 
 	g.EventManager.Emit(transfer.DISPATCH_MAP_INFO, g.makeMapInfo(transfer.DrawCard{CardType: "change", Card: cId}))
 
@@ -187,13 +190,13 @@ func (g *Game) drawChange(bFirst bool) bool {
 	return obstacle
 }
 
-func (g *Game) drawObstacle() bool {
+func (g *Game) drawObstacle(cNow string) bool {
 	cId := g.obstaclePool.Draw(1)
 	detail := g.obstaclePool.GetContent(cId[0])
 	g.obstaclePool.DropById(cId[0])
 
 	roundOver := true
-	cNow := g.cNames[g.pNow%2]
+	// cNow := g.cNames[g.pNow%2]
 	for k, v := range detail {
 		kk := strings.Split(k, "_")
 		if kk[0] == "p" {
