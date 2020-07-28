@@ -190,19 +190,28 @@ func (g *Game) drawChange(bFirst bool) string {
 	return obstacle
 }
 
-func (g *Game) drawObstacle(cNow string) bool {
+func (g *Game) drawObstacle(cTarget string) bool {
 	cId := g.obstaclePool.Draw(1)
 	detail := g.obstaclePool.GetContent(cId[0])
 	g.obstaclePool.DropById(cId[0])
 
+	var pTarget int
+	if g.cNames[g.pNow%2] == cTarget { // 需要抽阻礙的不是pNow這隊的時候，是找下一位對方玩家
+		pTarget = g.pNow
+	} else {
+		pTarget = (g.pNow + 1) % 6
+	}
+
 	roundOver := true
-	// cNow := g.cNames[g.pNow%2]
 	for k, v := range detail {
 		kk := strings.Split(k, "_")
 		if kk[0] == "p" {
-			schedules := g.devMap[cNow].Schedules()
+			schedules := g.devMap[cTarget].Schedules()
 			candidate := make([]int, 0, len(schedules))
 			for i, sche := range schedules {
+				if i == 0 { // 丟棄專案進度不包含license
+					continue
+				}
 				if kk[1] == strings.Split(sche, "_")[0] {
 					candidate = append(candidate, i)
 				}
@@ -210,9 +219,9 @@ func (g *Game) drawObstacle(cNow string) bool {
 
 			if len(candidate) > 1 {
 				roundOver = false
-				g.askDrop(g.pNow, kk[1])
+				g.askDrop(pTarget, kk[1])
 			} else if len(candidate) == 1 {
-				g.devMap[cNow].DropSchedule(g.company[cNow], candidate[0])
+				g.devMap[cTarget].DropSchedule(g.company[cTarget], candidate[0])
 			}
 
 		} else if kk[0] == "m" {
@@ -225,17 +234,16 @@ func (g *Game) drawObstacle(cNow string) bool {
 			}
 
 		} else if kk[0] == "h" {
-			comp := g.company[cNow]
-			pOfC := g.pNow / 2
+			comp := g.company[cTarget]
+			pOfC := pTarget / 2
 			for ; v > 0; v-- {
 				comp.DropHand(pOfC, utils.FindString(comp.HandDetail(pOfC), kk[1]))
 			}
 
-			g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cNow))
+			g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cTarget))
 
 		} else { // k == "office"
-			g.jungleMap.MakeHappy(cNow, false, 3, 4, 5)
-
+			g.jungleMap.MakeHappy(cTarget, false, 3, 4, 5)
 		}
 	}
 
@@ -451,16 +459,18 @@ func (g *Game) parseAction(act string, args ...string) {
 		g.ticker = nil
 
 		month, needDrop := comp.DrawHand(pOfC)
+
+		time.Sleep(100 * time.Millisecond) // 用了手牌送做完動作的結果時機跟抽新牌的時機太近了會撞在一起，拉個間隔
+
+		g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cNname, month))
+
+		time.Sleep(4 * time.Second) // wait client show anime of hand card
+
 		g.jungleMap.AddMonth(month)
 		if g.jungleMap.Month() > LAST_MONTH {
 			g.endGame()
 			return
 		}
-
-		time.Sleep(100 * time.Millisecond) // 用了手牌送做完動作的結果時機跟抽新牌的時機太近了會撞在一起，拉個間隔
-		g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cNname, month))
-
-		time.Sleep(4 * time.Second) // wait client show anime of hand card
 
 		if needDrop {
 			g.askDrop(g.pNow, HAND)
