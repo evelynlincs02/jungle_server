@@ -363,7 +363,7 @@ func (g *Game) parseAction(act string, args ...string) {
 
 		opt := g.jungleMap.DropOption(pType)
 		if len(opt[0]) > 0 || len(opt[1]) > 0 {
-			g.askDrop(g.pNow, MARKET, opt...) // 詢問棄市場(仍在行動回合內)
+			g.askDrop(g.pNow, MARKET, opt...) // 詢問棄市場
 			g.ticker.Stop()
 			return // 先返回，在接到玩家回應後再往下。若玩家時間到了仍未選完，客端會送已選的部分來 -> parseDrop
 		}
@@ -500,26 +500,26 @@ func (g *Game) askDrop(target int, dType string, opt ...[]int) {
 
 	g.dropTicker[target] = time.NewTicker(time.Second)
 
-	go func() { // receiver
+	go func(pDrop int) { // receiver
 		count := 0
 		for {
-			_ = <-g.dropTicker[target].C
+			_ = <-g.dropTicker[pDrop].C
 			if count++; count > DROP_SECOND {
-				g.parseDrop(g.players[target], []string{dType}, opt...)
+				g.parseDrop(g.players[pDrop], []string{dType}, opt...)
 				return
 			}
 			ct_msg := transfer.CountDown{
 				Target:      g.players,
 				Count:       DROP_SECOND - count,
-				PlayerIndex: g.pNow,
+				PlayerIndex: pDrop,
 				CountType:   DROP,
 			}
 			if target != g.pNow {
-				ct_msg.Target = []string{g.players[target]}
+				ct_msg.Target = []string{g.players[pDrop]}
 			}
 			g.EventManager.Emit(transfer.DISPATCH_COUNTDOWN, ct_msg)
 		}
-	}()
+	}(target)
 }
 
 func (g *Game) parseDrop(from string, data []string, opt ...[]int) {
@@ -535,7 +535,7 @@ func (g *Game) parseDrop(from string, data []string, opt ...[]int) {
 	if len(data) != 0 {
 		dType = strings.Split(data[0], "_")[0]
 		g.dropTicker[pIdx].Stop() // 讓ticker不要再送
-		g.dropTicker[pIdx] = nil
+		// g.dropTicker[pIdx] = nil // 沒事還是不要亂nil好了
 	}
 
 	if dType == MARKET {
