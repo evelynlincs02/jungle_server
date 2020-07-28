@@ -42,11 +42,3 @@ func Unique(s []string) []string {
 
 	return uni
 }
-
-// func GetMapKey(m map[string]interface{}) []string {
-// 	keys := make([]string, 0, len(m))
-// 	for k, _ := range m {
-// 		keys = append(keys, k)
-// 	}
-// 	return keys
-// }
