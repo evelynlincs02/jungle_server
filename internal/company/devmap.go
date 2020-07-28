@@ -139,24 +139,22 @@ func (dm *DevMap) DropSchedule(comp *Company, idx int) {
 
 func (dm *DevMap) Publish(pIdx []int, mNum map[string]int) (int, []string) {
 	pType := make([]string, 0, 5)
-	for idx := range pIdx {
+	for _, idx := range pIdx {
 		dm.publishN++
-		p := dm.projects[idx+1] // 傳來的idx是不含license的(從0開始)
+		p := dm.projects[idx]
 		detail := dm.productPool.GetContent(p.pId)
-		found := false
-		for i, pub := range dm.publishSum {
-			found = reflect.DeepEqual(pub.Content, detail)
-			if found {
-				for k := range detail {
+		for k, v := range detail {
+			found := false
+			for i, pub := range dm.publishSum {
+				found = reflect.DeepEqual(pub.Content, map[string]int{k: v})
+				if found {
 					dm.publishSum[i].Num += mNum[k]
 					pType = append(pType, k)
+					break
 				}
-				break
 			}
-		}
-		if !found {
-			dm.publishSum = append(dm.publishSum, Sum{detail, 0})
-			for k := range detail {
+			if !found {
+				dm.publishSum = append(dm.publishSum, Sum{map[string]int{k: v}, 0})
 				dm.publishSum[len(dm.publishSum)-1].Num += mNum[k]
 				pType = append(pType, k)
 			}

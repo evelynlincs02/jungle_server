@@ -401,7 +401,7 @@ func (g *Game) parseAction(act string, args ...string) {
 			pIdx, _ := strconv.Atoi(arg[0])
 			pCube, _ := strconv.Atoi(arg[1])
 
-			dm.CubeUpdate(pIdx, pCube) // FIXME: FAIL
+			dm.CubeUpdate(pIdx, pCube)
 		}
 		g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cNname))
 
@@ -457,6 +457,7 @@ func (g *Game) parseAction(act string, args ...string) {
 			return
 		}
 
+		time.Sleep(100 * time.Millisecond) // 用了手牌送做完動作的結果時機跟抽新牌的時機太近了會撞在一起，拉個間隔
 		g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cNname, month))
 
 		time.Sleep(4 * time.Second) // wait client show anime of hand card
