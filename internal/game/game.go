@@ -203,7 +203,7 @@ func (g *Game) drawObstacle(cNow string) bool {
 			schedules := g.devMap[cNow].Schedules()
 			candidate := make([]int, 0, len(schedules))
 			for i, sche := range schedules {
-				if sche == strings.Split(kk[1], "_")[0] {
+				if kk[1] == strings.Split(sche, "_")[0] {
 					candidate = append(candidate, i)
 				}
 			}

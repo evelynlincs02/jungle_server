@@ -66,8 +66,8 @@ func (info *AdmitAction) String() string {
 	ret := fmt.Sprintf("Target=%v, Action=%v",
 		info.Target, info.Action)
 	if info.DropType != nil {
-		ret += fmt.Sprintf(", DropType= %v, DropMarket= %v",
-			info.DropType, info.DropMarket)
+		ret += fmt.Sprintf(", DropType=%v, DropMarket=%v",
+			*info.DropType, info.DropMarket)
 	}
 	return ret
 }
