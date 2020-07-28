@@ -165,6 +165,8 @@ func startGame(cList []clientInfo) {
 					return
 				}
 
+				// From 要自己填
+				msg.Result.From = cList[i].sid
 				log.WithFields(log.Fields{"RECEIVE": string(message)}).Infoln(msg.String())
 
 				if msg.Type == transfer.TYPE_ACTION {
