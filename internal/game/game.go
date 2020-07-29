@@ -463,15 +463,15 @@ func (g *Game) parseAction(act string, args ...string) {
 
 		time.Sleep(100 * time.Millisecond) // 用了手牌送做完動作的結果時機跟抽新牌的時機太近了會撞在一起，拉個間隔
 
-		g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cNname, month))
-
-		time.Sleep(4 * time.Second) // wait client show anime of hand card
-
 		g.jungleMap.AddMonth(month)
 		if g.jungleMap.Month() > LAST_MONTH {
 			g.endGame()
 			return
 		}
+
+		g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cNname, month))
+
+		time.Sleep(4 * time.Second) // wait client show anime of hand card
 
 		if needDrop {
 			g.askDrop(g.pNow, HAND)
