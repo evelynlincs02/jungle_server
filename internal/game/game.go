@@ -7,6 +7,7 @@ import (
 	"jungle/server/game/pkg/event"
 	"jungle/server/game/pkg/transfer"
 	"jungle/server/game/pkg/utils"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ const (
 	DROP_SECOND  = 10
 	MAX_PLAYER   = 6
 	LAST_MONTH   = 9
+	MAX_HAND     = 4
 
 	// 方便直接靠編輯器帶入，減少打錯字的機會
 	BEAR        = "bear"
@@ -134,20 +136,20 @@ func (g *Game) removePlayer(p string) {
 	}
 	pOfC := pIdx / 2
 	cName := g.cNames[pIdx%2]
+	comp := g.company[cName]
 
 	// g.players[pIdx] = ""
 	g.pOnline[pIdx] = false
 	g.jungleMap.GoPos(pIdx, "Unknown")
 
-	for i := 6; i > 0; i-- {
-		g.company[cName].DropHand(pOfC, 0)
+	for i := len(comp.AllHand()[pOfC]); i > 0; i-- {
+		comp.DropHand(pOfC, 0)
 	}
 
 	g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cName))
 
 	if pIdx == g.pNow && g.ticker != nil {
 		g.ticker.Stop()
-		g.ticker = nil
 
 		g.pActPoint = 0
 
@@ -456,7 +458,6 @@ func (g *Game) parseAction(act string, args ...string) {
 
 	if g.pActPoint == 0 {
 		g.ticker.Stop()
-		g.ticker = nil
 
 		month, needDrop := comp.DrawHand(pOfC)
 
@@ -545,55 +546,58 @@ func (g *Game) parseDrop(from string, data []string, opt ...[]int) {
 	if len(data) != 0 {
 		dType = strings.Split(data[0], "_")[0]
 		g.dropTicker[pIdx].Stop() // 讓ticker不要再送
-		// g.dropTicker[pIdx] = nil // 沒事還是不要亂nil好了
+
+		if dType == MARKET {
+			drop := make([]int, 0, 3)
+			for _, d := range data {
+				dArr := strings.Split(d, "_")
+				if len(dArr) > 1 {
+					mIdx, _ := strconv.Atoi(strings.Split(d, "_")[1])
+					drop = append(drop, mIdx)
+				}
+			}
+			g.jungleMap.DropMarket(drop)
+			g.parseAction(OVER)
+
+		} else if dType == HAND {
+			drop := make([]int, 0, 2)
+			for _, d := range data {
+				dArr := strings.Split(d, "_")
+				if len(dArr) > 1 {
+					hIdx, _ := strconv.Atoi(dArr[1])
+					drop = append(drop, hIdx)
+				}
+			}
+			sort.Sort(sort.Reverse(sort.IntSlice(drop))) // sort drop from big to small
+			for _, dIdx := range drop {
+				comp.DropHand(pOfC, dIdx)
+			}
+
+			l := len(comp.AllHand()[pOfC])
+			for l > MAX_HAND {
+				comp.DropHand(pOfC, l-1-MAX_HAND)
+				l = len(comp.AllHand()[pOfC])
+			}
+			g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cName))
+
+			if pIdx == g.pNow {
+				g.drawShare()
+			}
+
+		} else {
+			for _, d := range data {
+				dArr := strings.Split(d, "_")
+				if len(dArr) > 1 {
+					pIdx, _ := strconv.Atoi(dArr[1])
+					g.devMap[cName].DropSchedule(comp, pIdx)
+				}
+			}
+
+			g.EventManager.Emit(transfer.DISPATCH_MAP_INFO, g.makeMapInfo())
+
+			g.switchPlayer()
+		}
 	}
-
-	if dType == MARKET {
-		drop := make([]int, 0, 3)
-		for _, d := range data {
-			dArr := strings.Split(d, "_")
-			if len(dArr) > 1 {
-				mIdx, _ := strconv.Atoi(strings.Split(d, "_")[1])
-				drop = append(drop, mIdx)
-			}
-		}
-		g.jungleMap.DropMarket(drop)
-		g.parseAction(OVER)
-
-	} else if dType == HAND {
-		for _, d := range data {
-			dArr := strings.Split(d, "_")
-			if len(dArr) > 1 {
-				hIdx, _ := strconv.Atoi(dArr[1])
-				comp.DropHand(pOfC, hIdx)
-			}
-		}
-
-		l := len(comp.AllHand()[pOfC])
-		for l > 4 {
-				comp.DropHand(pOfC, l-1-4)
-			l = len(comp.AllHand()[pOfC])
-		}
-		g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cName))
-
-		if pIdx == g.pNow {
-			g.drawShare()
-		}
-
-	} else {
-		for _, d := range data {
-			dArr := strings.Split(d, "_")
-			if len(dArr) > 1 {
-				pIdx, _ := strconv.Atoi(dArr[1])
-				g.devMap[cName].DropSchedule(comp, pIdx)
-			}
-		}
-
-		g.EventManager.Emit(transfer.DISPATCH_MAP_INFO, g.makeMapInfo())
-
-		g.switchPlayer()
-	}
-
 }
 
 func (g *Game) endGame() {
