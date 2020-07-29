@@ -571,7 +571,7 @@ func (g *Game) parseDrop(from string, data []string, opt ...[]int) {
 
 		l := len(comp.AllHand()[pOfC])
 		for l > 4 {
-			comp.DropHand(pOfC, 0)
+				comp.DropHand(pOfC, l-1-4)
 			l = len(comp.AllHand()[pOfC])
 		}
 		g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cName))
