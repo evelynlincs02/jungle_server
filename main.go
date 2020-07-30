@@ -23,6 +23,7 @@ func init() {
 	log.SetFormatter(&log.TextFormatter{
 		ForceColors: true,
 	})
+	log.SetLevel(log.ErrorLevel)
 }
 
 var addr = flag.String("addr", "localhost:8088", "http service address")
@@ -38,10 +39,10 @@ type clientInfo struct {
 
 var clientList []clientInfo
 var nameList []string
-var endSignal chan string
+var endSignal chan struct{}
 
 func main() {
-	endSignal = make(chan string)
+	endSignal = make(chan struct{})
 
 	defer func() {
 		log.Trace("main END")
@@ -54,11 +55,7 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(*addr, nil))
 
-	end := <-endSignal
-
-	if end == "END" {
-		return
-	}
+	<-endSignal
 }
 
 func handleConnect(w http.ResponseWriter, r *http.Request) {
@@ -68,13 +65,8 @@ func handleConnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, message, err := c.ReadMessage()
-	if err != nil {
-		log.Warn("ReadMessage:", err)
-		return
-	}
 	var msg transfer.Login
-	err = json.Unmarshal(message, &msg)
+	err = c.ReadJSON(&msg)
 	if err != nil {
 		log.Warn("Unmarshal:", err)
 		return
@@ -123,12 +115,7 @@ func startGame(cList []clientInfo) {
 				State:    transfer.LOBBY_START,
 			},
 		}
-		jsonByte, err := json.Marshal(loginObj)
-		if err != nil {
-			log.Warn("json.Marshal ERROR", err)
-			return
-		}
-		cList[i].send(websocket.TextMessage, jsonByte)
+		cList[i].send(websocket.TextMessage, loginObj)
 	}
 
 	time.Sleep(time.Second)
@@ -147,19 +134,14 @@ func startGame(cList []clientInfo) {
 	})
 	jungleGame.EventManager.On(transfer.DISPATCH_END, func(msg event.Message) {
 		sendGameData(cList, transfer.SEND_GAMEEND, msg)
-		endSignal <- "END"
+		endSignal <- struct{}{}
 	})
 
 	for idx := range cList {
 		go func(i int) {
 			for {
 				var msg transfer.ClientAction
-				_, message, err := cList[i].conn.ReadMessage()
-				if err != nil {
-					log.Warn("ReadMessage:", err)
-					return
-				}
-				err = json.Unmarshal(message, &msg)
+				err := cList[i].conn.ReadJSON(&msg)
 				if err != nil {
 					log.Warn("Unmarshal:", err)
 					return
@@ -167,7 +149,7 @@ func startGame(cList []clientInfo) {
 
 				// From 要自己填
 				msg.Result.From = cList[i].sid
-				log.WithFields(log.Fields{"RECEIVE": string(message)}).Infoln(msg.String())
+				log.WithFields(log.Fields{"RECEIVE": "ClientAction"}).Infoln(msg.String())
 
 				if msg.Type == transfer.TYPE_ACTION {
 					jungleGame.EventManager.Emit(transfer.RECEIVE_CLIENT_ACTION, msg)
@@ -182,11 +164,6 @@ func sendGameData(cList []clientInfo, dataType string, data event.Message) {
 	transObj := transfer.TransferObj{
 		Type:   dataType,
 		Result: data,
-	}
-	jsonByte, err := json.Marshal(transObj)
-	if err != nil {
-		log.Warn("json.Marshal ERROR", err)
-		return
 	}
 
 	var targets []string
@@ -215,13 +192,13 @@ func sendGameData(cList []clientInfo, dataType string, data event.Message) {
 
 	for i := range cList {
 		if utils.FindString(targets, cList[i].sid) != len(targets) {
-			cList[i].send(websocket.TextMessage, jsonByte)
+			cList[i].send(websocket.TextMessage, transObj)
 		}
 	}
 }
 
-func (p *clientInfo) send(messageType int, data []byte) error {
+func (p *clientInfo) send(messageType int, data interface{}) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return p.conn.WriteMessage(websocket.TextMessage, data)
+	return p.conn.WriteJSON(data)
 }
