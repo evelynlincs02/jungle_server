@@ -175,7 +175,6 @@ func (g *Game) drawChange(bFirst bool) string {
 	var cNow string
 	if bFirst { // 第一次市場變動時不要抽"抽阻礙"的卡
 		cId = g.changePool.Draw(1, 16)
-		cNow = ""
 	} else {
 		cId = g.changePool.Draw(1)
 		cNow = g.cNames[g.pNow%2]
@@ -660,6 +659,9 @@ func (g *Game) makeEndScore() transfer.EndScore {
 			for k, v := range s.Content {
 				sums[i] = append(sums[i], transfer.ProductSum{Name: k, Value: v, Num: s.Num})
 			}
+		}
+		if sums[i] == nil {
+			sums[i] = make([]transfer.ProductSum, 0)
 		}
 	}
 

@@ -204,7 +204,6 @@ func (dm *DevMap) NumOfNextSchedule(s string) int {
 	sum := 0
 
 	for _, p := range dm.projects {
-		// log.Println(p.nextSchedule().String())
 		if s == p.nextSchedule().String() {
 			sum++
 		}

@@ -68,7 +68,7 @@ func (j *JungleMap) Change(detail map[string]int, cNow string) string {
 		return cNow
 	}
 
-	var obstacle string = ""
+	var obstacleTarget string = ""
 
 	// 市場變動
 	for k, v := range detail {
@@ -93,13 +93,13 @@ func (j *JungleMap) Change(detail map[string]int, cNow string) string {
 			// 辦公室人員轉為不開心
 			if j.officeHappy[k][v] {
 				j.officeHappy[k][v] = false
-			} else { // 本來就不開心，抽阻礙
-				obstacle = cNow
+			} else { // 本來就不開心，該辦公室抽阻礙
+				obstacleTarget = k
 			}
 		}
 	}
 
-	return obstacle
+	return obstacleTarget
 }
 
 func (j *JungleMap) DropMarket(target []int) {
