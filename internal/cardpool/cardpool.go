@@ -2,14 +2,8 @@ package cardpool
 
 import (
 	"jungle/server/game/pkg/utils"
-	"math/rand"
 	"reflect"
-	"time"
 )
-
-func init() {
-	rand.Seed(time.Now().UTC().UnixNano())
-}
 
 type card struct {
 	id      int
@@ -58,7 +52,7 @@ func (cp *CardPool) Draw(n int, not ...int) []int {
 	var drawed []int
 	for n > 0 {
 		// 抽取 deck 內第 ri 張卡，放進 drawed，並從deck中刪除
-		ri := rand.Intn(len(cp.deck))
+		ri := utils.RandomInt(len(cp.deck))
 
 		// 如果有不該抽到的牌，重抽
 		if utils.FindInt(not, cp.deck[ri]) < len(not) {

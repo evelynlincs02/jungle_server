@@ -1,8 +1,13 @@
 package utils
 
-// type T interface {
-// 	IndexOf(T)
-// }
+import (
+	"math/rand"
+	"time"
+)
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
 
 func FindInt(a []int, target int) int {
 	for i, v := range a {
@@ -41,4 +46,19 @@ func Unique(s []string) []string {
 	}
 
 	return uni
+}
+
+func RandomInt(n int) int { // [0,n)
+	return rand.Intn(n)
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyz" +
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func RandomString(length uint) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }

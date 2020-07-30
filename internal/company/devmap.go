@@ -79,14 +79,6 @@ func NewDevMap() *DevMap {
 	dm.productPool = cardpool.NewProductPool()
 	dm.publishN = 0
 
-	// for i := 0; ; i++ { // 初始所有種類專案
-	// 	d := dm.productPool.GetContent(i)
-	// 	if d == nil {
-	// 		break
-	// 	}
-	// 	dm.published = append(dm.published, Sum{d, 0})
-	// }
-
 	return dm
 }
 

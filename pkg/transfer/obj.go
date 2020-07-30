@@ -147,9 +147,9 @@ const (
 	LOBBY_START = "starting"
 	LOBBY_WAIT  = "waiting"
 
-	TYPE_LOBBY       = "lobby"
 	TYPE_LOGIN       = "login"
 	TYPE_ACTION      = "action"
+	SEND_LOBBY       = "lobby"
 	SEND_GAMESHARE   = "game_share"
 	SEND_GAMECOMPANY = "game_company"
 	SEND_ADMITACTION = "game_player"

@@ -83,7 +83,7 @@ func handleConnect(w http.ResponseWriter, r *http.Request) {
 		nameList = append(nameList, name)
 
 		loginObj := transfer.TransferObj{
-			Type: transfer.TYPE_LOBBY,
+			Type: transfer.SEND_LOBBY,
 			Result: transfer.Lobby{
 				Position: nameList,
 				Index:    len(clientList) - 1,
@@ -108,7 +108,7 @@ func startGame(cList []clientInfo) {
 	for i := range cList {
 		idList[i] = cList[i].sid
 		loginObj := transfer.TransferObj{
-			Type: transfer.TYPE_LOBBY,
+			Type: transfer.SEND_LOBBY,
 			Result: transfer.Lobby{
 				Position: nameList,
 				Index:    i,
