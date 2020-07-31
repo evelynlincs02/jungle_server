@@ -65,7 +65,7 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		logger.Info(d.String(), zap.String("dataType", "ShareInfo"))
+		logger.Info("ShareInfo", zap.String("data", d.String()))
 
 		gr.gameBroadcast(targets, transObj)
 	})
@@ -77,7 +77,7 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		logger.Info(d.String(), zap.String("dataType", "CompanyInfo"))
+		logger.Info("CompanyInfo", zap.String("data", d.String()))
 
 		gr.gameBroadcast(targets, transObj)
 	})
@@ -89,7 +89,7 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		logger.Info(d.String(), zap.String("dataType", "AdmitAction"))
+		logger.Info("AdmitAction", zap.String("data", d.String()))
 
 		gr.gameBroadcast(targets, transObj)
 	})
@@ -101,8 +101,6 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		// logger.Info(d.String(), zap.String("dataType", "CountDown"))
-
 		gr.gameBroadcast(targets, transObj)
 	})
 	gr.game.EventManager.On(transfer.DISPATCH_END, func(msg event.Message) {
@@ -113,7 +111,7 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		logger.Info(d.String(), zap.String("dataType", "EndScore"))
+		logger.Info("EndScore", zap.String("data", d.String()))
 
 		gr.gameBroadcast(targets, transObj)
 	})
@@ -160,7 +158,8 @@ func (gr *gameRoom) handleAction() {
 
 				// From 要自己填
 				msg.Result.From = gr.clientList[i].sid
-				logger.Info(msg.String(), zap.String("dataType", "ClientAction"))
+
+				logger.Info("ClientAction", zap.String("RECEIVE", msg.String()))
 
 				if msg.Type == transfer.TYPE_ACTION {
 					gr.game.EventManager.Emit(transfer.RECEIVE_CLIENT_ACTION, msg)

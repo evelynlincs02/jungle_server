@@ -14,6 +14,8 @@ func init() {
 	config := zap.NewDevelopmentConfig()
 	config.OutputPaths = []string{"stdout"}
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	config.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+	config.DisableCaller = true
 
 	var err error
 	logger, err = config.Build()
@@ -58,7 +60,7 @@ func (gm *GameManager) HandleLogin(c *websocket.Conn) {
 		return
 	}
 
-	logger.Info(msg.Result.GiveName, zap.String("timing", "Login"))
+	logger.Info("Login", zap.String("name", msg.Result.GiveName))
 
 	waitingRoom := gm.gameRoom[gm.roomIndex]
 	loginData := msg.Result
