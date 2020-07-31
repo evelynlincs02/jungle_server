@@ -27,7 +27,7 @@ func NewRoom() *gameRoom {
 	return r
 }
 
-func (gr *gameRoom) addClient(conn *websocket.Conn, name string) bool {
+func (gr *gameRoom) addClient(conn *websocket.Conn, name string) (bool, string) {
 	newClient := ClientInfo{
 		conn:  conn,
 		sid:   utils.RandomString(SID_LENGTH),
@@ -41,10 +41,14 @@ func (gr *gameRoom) addClient(conn *websocket.Conn, name string) bool {
 	gr.lobbyBroadcast(transfer.LOBBY_WAIT)
 
 	if len(gr.clientList) == PLAYER_PER_ROOM {
-		return true
+		return true, newClient.sid
 	}
 
-	return false
+	return false, newClient.sid
+}
+
+func (gr *gameRoom) removeClient(sid string) {
+	gr.game.RemovePlayer(sid)
 }
 
 func (gr *gameRoom) startGame() {

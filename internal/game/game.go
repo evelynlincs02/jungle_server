@@ -129,7 +129,7 @@ func (g *Game) start() {
 	g.switchPlayer()
 }
 
-func (g *Game) removePlayer(p string) {
+func (g *Game) RemovePlayer(p string) {
 	pIdx := utils.FindString(g.players, p)
 	if pIdx == MAX_PLAYER {
 		return
@@ -148,12 +148,12 @@ func (g *Game) removePlayer(p string) {
 
 	g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cName))
 
-	if pIdx == g.pNow && g.ticker != nil {
+	if pIdx == g.pNow {
 		g.ticker.Stop()
 
 		g.pActPoint = 0
 
-		g.drawShare()
+		g.switchPlayer()
 	}
 
 }

@@ -64,9 +64,15 @@ func (gm *GameManager) HandleLogin(c *websocket.Conn) {
 
 	waitingRoom := gm.gameRoom[gm.roomIndex]
 	loginData := msg.Result
-	full := waitingRoom.addClient(c, loginData.GiveName)
+	full, sid := waitingRoom.addClient(c, loginData.GiveName)
 	if full {
 		go waitingRoom.startGame()
 		gm.nextRoom()
 	}
+
+	c.SetCloseHandler(func(code int, text string) error {
+		logger.Warn("Close", zap.String("sid", sid))
+		waitingRoom.removeClient(sid)
+		return nil
+	})
 }
