@@ -1,7 +1,7 @@
 package cardpool
 
 import (
-	"jungle/server/game/pkg/utils"
+	"jungle/server/pkg/utils"
 	"reflect"
 )
 

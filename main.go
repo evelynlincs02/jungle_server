@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"jungle/server/game/internal/manager"
+	"jungle/server/internal/manager"
 	"net/http"
 
 	"github.com/gorilla/websocket"

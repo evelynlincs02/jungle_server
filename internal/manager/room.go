@@ -1,10 +1,10 @@
 package manager
 
 import (
-	"jungle/server/game/internal/game"
-	"jungle/server/game/pkg/event"
-	"jungle/server/game/pkg/transfer"
-	"jungle/server/game/pkg/utils"
+	"jungle/server/internal/game"
+	"jungle/server/pkg/event"
+	"jungle/server/pkg/transfer"
+	"jungle/server/pkg/utils"
 	"time"
 
 	"github.com/gorilla/websocket"

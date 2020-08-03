@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"jungle/server/game/pkg/transfer"
+	"jungle/server/pkg/transfer"
 
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"

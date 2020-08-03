@@ -1,12 +1,12 @@
 package game
 
 import (
-	"jungle/server/game/internal/cardpool"
-	"jungle/server/game/internal/company"
-	"jungle/server/game/internal/junglemap"
-	"jungle/server/game/pkg/event"
-	"jungle/server/game/pkg/transfer"
-	"jungle/server/game/pkg/utils"
+	"jungle/server/internal/cardpool"
+	"jungle/server/internal/company"
+	"jungle/server/internal/junglemap"
+	"jungle/server/pkg/event"
+	"jungle/server/pkg/transfer"
+	"jungle/server/pkg/utils"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,7 +19,7 @@ const (
 	ROUND_SECOND = 60
 	DROP_SECOND  = 10
 	MAX_PLAYER   = 6
-	LAST_MONTH   = 9
+	LAST_MONTH   = 1
 	MAX_HAND     = 4
 
 	// 方便直接靠編輯器帶入，減少打錯字的機會

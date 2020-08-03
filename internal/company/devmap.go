@@ -1,8 +1,8 @@
 package company
 
 import (
-	"jungle/server/game/internal/cardpool"
-	"jungle/server/game/pkg/utils"
+	"jungle/server/internal/cardpool"
+	"jungle/server/pkg/utils"
 	"reflect"
 	"strconv"
 )
