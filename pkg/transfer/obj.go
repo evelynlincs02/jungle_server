@@ -36,8 +36,12 @@ type DrawCard struct {
 }
 
 func (info *ShareInfo) String() string {
-	return fmt.Sprintf("Market=%v, Position=%v, BearOffice= %v, BearProgress=%v, DeerOffice=%v, DeerProgress=%v",
+	ret := fmt.Sprintf("Market=%v, Position=%v, BearOffice= %v, BearProgress=%v, DeerOffice=%v, DeerProgress=%v",
 		info.Market, info.PlayerPosition, info.BearOffice, info.BearProgress, info.DeerOffice, info.DeerProgress)
+	if info.DrawCard != nil {
+		ret += fmt.Sprintf(", DrawCard=%v %v", info.DrawCard.CardType, info.DrawCard.Card)
+	}
+	return ret
 }
 
 type CompanyInfo struct {

@@ -35,7 +35,7 @@ type GameManager struct {
 	roomIndex int
 }
 
-func StartServer() *GameManager {
+func NewGameManager() *GameManager {
 	gm := new(GameManager)
 
 	gm.gameRoom = make(map[int]*gameRoom, 10)

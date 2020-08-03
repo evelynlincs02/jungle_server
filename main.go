@@ -23,7 +23,7 @@ func init() {
 var gameManager *manager.GameManager
 
 func main() {
-	gameManager = manager.StartServer()
+	gameManager = manager.NewGameManager()
 
 	http.HandleFunc("/", handleConnect)
 
