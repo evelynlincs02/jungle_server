@@ -19,7 +19,7 @@ const (
 	ROUND_SECOND = 60
 	DROP_SECOND  = 10
 	MAX_PLAYER   = 6
-	LAST_MONTH   = 1
+	LAST_MONTH   = 9
 	MAX_HAND     = 4
 
 	// 方便直接靠編輯器帶入，減少打錯字的機會
