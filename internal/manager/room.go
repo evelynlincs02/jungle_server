@@ -14,15 +14,12 @@ import (
 type gameRoom struct {
 	game       *game.Game
 	clientList []*ClientInfo
-
-	nameList []string
 }
 
 func NewRoom() *gameRoom {
 	r := new(gameRoom)
 
 	r.clientList = make([]*ClientInfo, 0, PLAYER_PER_ROOM)
-	r.nameList = make([]string, 0, PLAYER_PER_ROOM)
 
 	return r
 }
@@ -36,7 +33,6 @@ func (gr *gameRoom) addClient(conn *websocket.Conn, name string) (bool, string) 
 	}
 
 	gr.clientList = append(gr.clientList, &newClient)
-	gr.nameList = append(gr.nameList, newClient.name)
 
 	gr.lobbyBroadcast(transfer.LOBBY_WAIT)
 
@@ -48,6 +44,13 @@ func (gr *gameRoom) addClient(conn *websocket.Conn, name string) (bool, string) 
 }
 
 func (gr *gameRoom) removeClient(sid string) {
+	for i := range gr.clientList {
+		if gr.clientList[i].sid == sid {
+			gr.clientList[i].name = "OFFLINE"
+			gr.lobbyBroadcast(transfer.LOBBY_WAIT)
+			break
+		}
+	}
 	gr.game.RemovePlayer(sid)
 }
 
@@ -128,9 +131,14 @@ func (gr *gameRoom) lobbyBroadcast(state string) {
 		Type: transfer.SEND_LOBBY,
 	}
 
+	nameList := make([]string, 0, PLAYER_PER_ROOM)
+	for i := range gr.clientList {
+		nameList = append(nameList, gr.clientList[i].name)
+	}
+
 	for i := range gr.clientList {
 		res := transfer.Lobby{
-			Position: gr.nameList,
+			Position: nameList,
 			Index:    i,
 			State:    state,
 		}

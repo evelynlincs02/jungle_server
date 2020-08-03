@@ -272,7 +272,7 @@ func (g *Game) switchPlayer() {
 func (g *Game) resetTimer() {
 	if !g.pOnline[g.pNow] { // 玩家已離線
 		g.pActPoint = 0
-		g.drawShare()
+		g.switchPlayer()
 
 		return
 	}
