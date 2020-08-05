@@ -2,6 +2,7 @@ package manager
 
 import (
 	"jungle/server/pkg/transfer"
+	"jungle/server/pkg/utils"
 
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
@@ -30,7 +31,6 @@ const (
 
 type GameManager struct {
 	gameRoom map[int]*gameRoom
-	// clientMap map[string]*websocket.Conn
 
 	roomIndex int
 }
@@ -42,7 +42,7 @@ func NewGameManager() *GameManager {
 	gm.roomIndex = -1
 	gm.nextRoom()
 
-	logger.Info("Listening")
+	logger.Debug("Listening")
 
 	return gm
 }
@@ -60,8 +60,6 @@ func (gm *GameManager) HandleLogin(c *websocket.Conn) {
 		return
 	}
 
-	logger.Info("Login", zap.String("name", msg.Result.GiveName))
-
 	waitingRoom := gm.gameRoom[gm.roomIndex]
 	loginData := msg.Result
 	full, sid := waitingRoom.addClient(c, loginData.GiveName)
@@ -70,8 +68,11 @@ func (gm *GameManager) HandleLogin(c *websocket.Conn) {
 		gm.nextRoom()
 	}
 
+	logger.Info(utils.MemUsageString(),
+		zap.String("login name", msg.Result.GiveName), zap.String("login sid", sid), zap.Strings("players", waitingRoom.getClientList("sid")))
+
 	c.SetCloseHandler(func(code int, text string) error {
-		logger.Warn("Close", zap.String("sid", sid))
+		logger.Info(utils.MemUsageString(), zap.String("close", sid))
 		waitingRoom.removeClient(sid)
 		return nil
 	})

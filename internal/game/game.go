@@ -148,14 +148,26 @@ func (g *Game) RemovePlayer(p string) {
 
 	g.EventManager.Emit(transfer.DISPATCH_COMPANY_INFO, g.makeCompanyInfo(cName))
 
-	if pIdx == g.pNow {
-		g.ticker.Stop()
-
-		g.pActPoint = 0
-
-		g.switchPlayer()
+	stillOnline := false
+	for _, p := range g.pOnline {
+		if p {
+			stillOnline = true
+			break
+		}
 	}
+	if stillOnline {
+		if pIdx == g.pNow {
+			if g.ticker != nil {
+				g.ticker.Stop()
+			}
 
+			g.pActPoint = 0
+
+			g.switchPlayer()
+		}
+	} else {
+		g.endGame()
+	}
 }
 
 func (g *Game) drawShare() {

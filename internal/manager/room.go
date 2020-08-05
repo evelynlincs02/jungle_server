@@ -59,10 +59,7 @@ func (gr *gameRoom) startGame() {
 
 	time.Sleep(time.Second)
 
-	sIdList := make([]string, PLAYER_PER_ROOM)
-	for i, client := range gr.clientList {
-		sIdList[i] = client.sid
-	}
+	sIdList := gr.getClientList("sid")
 	gr.game = game.NewGame(sIdList)
 	gr.game.EventManager.On(transfer.DISPATCH_MAP_INFO, func(msg event.Message) {
 		d := msg.(transfer.ShareInfo)
@@ -72,7 +69,7 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		logger.Info("ShareInfo", zap.String("data", d.String()))
+		logger.Debug(utils.MemUsageString(), zap.String(transfer.DISPATCH_MAP_INFO, d.String()))
 
 		gr.gameBroadcast(targets, transObj)
 	})
@@ -84,7 +81,7 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		logger.Info("CompanyInfo", zap.String("data", d.String()))
+		logger.Debug(utils.MemUsageString(), zap.String(transfer.DISPATCH_COMPANY_INFO, d.String()))
 
 		gr.gameBroadcast(targets, transObj)
 	})
@@ -96,7 +93,7 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		logger.Info("AdmitAction", zap.String("data", d.String()))
+		logger.Debug(utils.MemUsageString(), zap.String(transfer.DISPATCH_ADMIT_ACTION, d.String()))
 
 		gr.gameBroadcast(targets, transObj)
 	})
@@ -118,7 +115,7 @@ func (gr *gameRoom) startGame() {
 			Result: d,
 		}
 
-		logger.Info("EndScore", zap.String("data", d.String()))
+		logger.Debug(utils.MemUsageString(), zap.String(transfer.DISPATCH_END, d.String()))
 
 		gr.gameBroadcast(targets, transObj)
 	})
@@ -131,10 +128,7 @@ func (gr *gameRoom) lobbyBroadcast(state string) {
 		Type: transfer.SEND_LOBBY,
 	}
 
-	nameList := make([]string, 0, PLAYER_PER_ROOM)
-	for i := range gr.clientList {
-		nameList = append(nameList, gr.clientList[i].name)
-	}
+	nameList := gr.getClientList("name")
 
 	for i := range gr.clientList {
 		res := transfer.Lobby{
@@ -171,7 +165,7 @@ func (gr *gameRoom) handleAction() {
 				// From 要自己填
 				msg.Result.From = gr.clientList[i].sid
 
-				logger.Info("ClientAction", zap.String("RECEIVE", msg.String()))
+				logger.Debug(utils.MemUsageString(), zap.String("RECEIVE", msg.String()))
 
 				if msg.Type == transfer.TYPE_ACTION {
 					gr.game.EventManager.Emit(transfer.RECEIVE_CLIENT_ACTION, msg)
@@ -179,5 +173,21 @@ func (gr *gameRoom) handleAction() {
 
 			}
 		}(idx)
+	}
+}
+
+func (gr *gameRoom) getClientList(t string) []string {
+	res := make([]string, 0, PLAYER_PER_ROOM)
+	switch t {
+	case "name":
+		for _, c := range gr.clientList {
+			res = append(res, c.name)
+		}
+		return res
+	default:
+		for _, c := range gr.clientList {
+			res = append(res, c.sid)
+		}
+		return res
 	}
 }

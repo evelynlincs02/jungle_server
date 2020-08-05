@@ -18,18 +18,11 @@ type CardPool struct {
 }
 
 func (cp *CardPool) GetContent(id int) map[string]int {
-	// if id >= len(cp.detail) {
-	// 	return nil
-	// }
-	// if cp.detail[id].id == id {
-	// 	return cp.detail[id].content
-	// } else {
 	for _, d := range cp.detail {
 		if d.id == id {
 			return d.content
 		}
 	}
-	// }
 	return nil
 }
 

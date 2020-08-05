@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"math/rand"
+	"runtime"
 	"time"
 )
 
@@ -61,4 +63,25 @@ func RandomString(length uint) string {
 		b[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(b)
+}
+
+// https://gist.github.com/j33ty/79e8b736141be19687f565ea4c6f4226
+//  Alloc is bytes of allocated heap objects.
+//  TotalAlloc is cumulative bytes allocated for heap objects.
+//  Sys is the total bytes of memory obtained from the OS.
+//  NumGC is the number of completed GC cycles.
+func MemUsageString() string {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
+	return fmt.Sprintf("Alloc=%v KiB\tTotalAlloc = %v KiB\tSys = %v KiB\tNumGC = %v\n",
+		bToKb(m.Alloc), bToKb(m.TotalAlloc), bToKb(m.Sys), m.NumGC)
+}
+
+func bToMb(b uint64) uint64 {
+	return b / 1024 / 1024
+}
+
+func bToKb(b uint64) uint64 {
+	return b / 1024
 }
