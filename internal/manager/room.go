@@ -14,12 +14,14 @@ import (
 type gameRoom struct {
 	game       *game.Game
 	clientList []*ClientInfo
+	state      string
 }
 
 func NewRoom() *gameRoom {
 	r := new(gameRoom)
 
 	r.clientList = make([]*ClientInfo, 0, PLAYER_PER_ROOM)
+	r.state = transfer.LOBBY_WAIT
 
 	return r
 }
@@ -44,17 +46,28 @@ func (gr *gameRoom) addClient(conn *websocket.Conn, name string) (bool, string) 
 }
 
 func (gr *gameRoom) removeClient(sid string) {
+	var cIdx int
 	for i := range gr.clientList {
 		if gr.clientList[i].sid == sid {
-			gr.clientList[i].name = "OFFLINE"
-			gr.lobbyBroadcast(transfer.LOBBY_WAIT)
+			cIdx = i
 			break
 		}
 	}
-	gr.game.RemovePlayer(sid)
+	if gr.state == transfer.LOBBY_WAIT {
+		nowNum := len(gr.clientList)
+		gr.clientList[cIdx] = gr.clientList[nowNum-1]
+		gr.clientList = gr.clientList[:nowNum-1]
+		gr.lobbyBroadcast(transfer.LOBBY_WAIT)
+	} else {
+		gr.clientList[cIdx].name = "OFFLINE"
+		gr.game.RemovePlayer(sid)
+		gr.lobbyBroadcast(transfer.LOBBY_OFFLINE)
+	}
+	logger.Debug("Remove", zap.Int("idx", cIdx), zap.Strings("sids", gr.getClientList("sid")))
 }
 
 func (gr *gameRoom) startGame() {
+	gr.state = transfer.LOBBY_START
 	gr.lobbyBroadcast(transfer.LOBBY_START)
 
 	time.Sleep(time.Second)

@@ -37,5 +37,12 @@ func handleConnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// c.SetCloseHandler(func(code int, text string) error {
+	// 	logger.Info(utils.MemUsageString(), zap.String("close", r.URL.Host))
+	// 	return nil
+	// })
+
+	// c.SetReadDeadline(time.Now().Add(time.Second * 3))
+
 	gameManager.HandleLogin(c)
 }

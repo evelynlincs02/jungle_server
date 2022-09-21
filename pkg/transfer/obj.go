@@ -148,8 +148,9 @@ const (
 
 	RECEIVE_CLIENT_ACTION = "CLIENT_ACTION"
 
-	LOBBY_START = "starting"
-	LOBBY_WAIT  = "waiting"
+	LOBBY_START   = "starting"
+	LOBBY_WAIT    = "waiting"
+	LOBBY_OFFLINE = "offline"
 
 	TYPE_LOGIN       = "login"
 	TYPE_ACTION      = "action"
