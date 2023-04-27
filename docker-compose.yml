@@ -8,3 +8,4 @@ services:
       - .:/jungle
     working_dir: /jungle
     command: "go run main.go"
+    network_mode: bridge
