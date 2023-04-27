@@ -1,0 +1,10 @@
+services:
+  server:
+    image: golang:1.20
+    container_name: evelyn_jungle-server
+    ports: 
+      - 8088:8088
+    volumes:
+      - .:/jungle
+    working_dir: /jungle
+    command: "go run main.go"

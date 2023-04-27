@@ -4,12 +4,13 @@ import (
 	"flag"
 	"jungle/server/internal/manager"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
 
-var addr = flag.String("addr", "localhost:8088", "http service address")
+var addr = flag.String("addr", "0.0.0.0:8088", "http service address")
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
@@ -42,7 +43,7 @@ func handleConnect(w http.ResponseWriter, r *http.Request) {
 	// 	return nil
 	// })
 
-	// c.SetReadDeadline(time.Now().Add(time.Second * 3))
+	c.SetReadDeadline(time.Now().Add(time.Second * 3))
 
 	gameManager.HandleLogin(c)
 }
